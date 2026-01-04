@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!-- saved from url=(0028)file:///D:/code/lat-the.html -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Game Lật Thẻ</title>
+
+<style>
+body {
+    background: #222;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.controls {
+    margin: 15px;
+}
+
+input {
+    width: 60px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+button {
+    padding: 6px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.game {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.card {
+    width: 80px;
+    height: 80px;
+    background: #555;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.card.open {
+    background: #fff;
+    color: #000;
+}
+
+.card.hide {
+    visibility: hidden;
+}
+
+#message {
+    margin-top: 15px;
+    font-size: 20px;
+    color: #00ff99;
+}
+
+/* ⭐ CREDIT */
+.credit {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🃏 Game Lật Thẻ</h1>
+
+<div class="controls">
+    Hàng:
+    <input type="number" id="rows" value="4" min="2">
+    Cột:
+    <input type="number" id="cols" value="4" min="2">
+    <button onclick="startGame()">Bắt đầu</button>
+    <button onclick="resetGame()">Chơi lại</button>
+</div>
+
+<div class="game" id="game"></div>
+<div id="message"></div>
+
+<!-- ⭐ CREDIT -->
+<div class="credit">
+    © Created by <strong>odette duck</strong>
+</div>
+
+<script>
+let first = null;
+let second = null;
+let lock = false;
+let matchedPairs = 0;
+let totalPairs = 0;
+
+function startGame() {
+    const rows = Number(document.getElementById("rows").value);
+    const cols = Number(document.getElementById("cols").value);
+    const total = rows * cols;
+
+    if (total % 2 !== 0) {
+        alert("Hàng × cột phải là số chẵn");
+        return;
+    }
+
+    const game = document.getElementById("game");
+    game.innerHTML = "";
+    game.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+
+    document.getElementById("message").textContent = "";
+
+    const baseIcons = ['🍎','🍌','🍇','🍒','🥝','🍍','🍉','🍓','🍑','🥭'];
+    let cards = [];
+
+    totalPairs = total / 2;
+    matchedPairs = 0;
+
+    for (let i = 0; i < totalPairs; i++) {
+        const icon = baseIcons[i % baseIcons.length];
+        cards.push(icon, icon);
+    }
+
+    cards.sort(() => Math.random() - 0.5);
+
+    first = null;
+    second = null;
+    lock = false;
+
+    cards.forEach(icon => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = "?";
+
+        card.onclick = () => {
+            if (lock || card.classList.contains("open")) return;
+
+            card.textContent = icon;
+            card.classList.add("open");
+
+            if (!first) {
+                first = card;
+                first.icon = icon;
+            } else {
+                second = card;
+                second.icon = icon;
+                lock = true;
+
+                if (first.icon === second.icon) {
+                    setTimeout(() => {
+                        first.classList.add("hide");
+                        second.classList.add("hide");
+                        matchedPairs++;
+
+                        if (matchedPairs === totalPairs) {
+                            document.getElementById("message").textContent =
+                                "🎉 Bạn đã thắng!";
+                        }
+                        resetTurn();
+                    }, 300);
+                } else {
+                    setTimeout(() => {
+                        first.textContent = "?";
+                        second.textContent = "?";
+                        first.classList.remove("open");
+                        second.classList.remove("open");
+                        resetTurn();
+                    }, 600);
+                }
+            }
+        };
+
+        game.appendChild(card);
+    });
+}
+
+function resetTurn() {
+    first = null;
+    second = null;
+    lock = false;
+}
+
+function resetGame() {
+    document.getElementById("game").innerHTML = "";
+    document.getElementById("message").textContent = "";
+}
+</script>
+
+
+
+
+
+</body></html>
